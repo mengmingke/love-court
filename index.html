@@ -143,7 +143,10 @@
               <p class="eyebrow">Share Card</p>
               <h2>判决书分享卡</h2>
             </div>
-            <button class="secondary-action small" id="saveCardBtn" type="button">复制文案</button>
+            <div class="share-actions">
+              <button class="secondary-action small" id="copyVerdictBtn" type="button">复制文案</button>
+              <button class="secondary-action small" id="saveCardBtn" type="button">生成图片</button>
+            </div>
           </div>
 
           <article class="verdict-card" id="verdictCard">
@@ -198,6 +201,17 @@
             </div>
             <p id="cardReason">AI法官将根据双方陈词生成事实认定、争议焦点与和解建议。</p>
           </article>
+
+          <section class="share-image-panel" id="shareImagePanel" hidden>
+            <div class="panel-heading compact">
+              <div>
+                <p class="eyebrow">PNG</p>
+                <h2>判决书图片</h2>
+              </div>
+              <a class="download-link" id="shareImageDownload" href="#" download="love-court-verdict.png">下载图片</a>
+            </div>
+            <img id="shareImagePreview" alt="判决书图片预览" />
+          </section>
 
           <section class="verdict-detail" id="verdictDetail" aria-live="polite"></section>
         </section>

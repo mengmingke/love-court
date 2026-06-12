@@ -178,6 +178,13 @@ h3 {
   font-size: 14px;
 }
 
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
 .tab-list {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -573,6 +580,31 @@ textarea:focus {
   margin-top: 22px;
 }
 
+.share-image-panel {
+  margin-top: 22px;
+}
+
+.share-image-panel img {
+  display: block;
+  width: min(100%, 420px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.download-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #fff;
+  background: var(--blue);
+  font-size: 14px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
 .detail-block {
   padding: 16px;
   border: 1px solid var(--line);
@@ -735,6 +767,14 @@ body[data-poster="true"] .verdict-card {
   .primary-action,
   .secondary-action {
     width: 100%;
+  }
+
+  .share-actions {
+    width: 100%;
+  }
+
+  .share-actions .secondary-action {
+    flex: 1 1 130px;
   }
 
   .verdict-card {

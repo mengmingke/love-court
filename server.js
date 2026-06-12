@@ -2,6 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const sharp = require("sharp");
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = __dirname;
@@ -130,6 +131,22 @@ async function handleApi(req, res, url) {
       writeCases(cases);
       const updated = cases[index];
       sendJson(res, 200, { case: updated });
+      return;
+    }
+
+    if (method === "GET" && parts[3] === "share-image") {
+      const item = findCaseOrThrow(caseId);
+      if (!item.verdict) {
+        sendJson(res, 400, { error: "请先生成裁决，再生成判决书图片。" });
+        return;
+      }
+      const png = await buildShareImagePng(item);
+      res.writeHead(200, {
+        "Content-Type": "image/png",
+        "Content-Disposition": `inline; filename="love-court-${item.caseNumber}.png"`,
+        "Cache-Control": "no-store",
+      });
+      res.end(png);
       return;
     }
   }
@@ -406,6 +423,111 @@ function normalizeIndices(indices, fallback) {
     normalized[key] = Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : fallback[key];
   }
   return normalized;
+}
+
+async function buildShareImagePng(item) {
+  const svg = buildShareImageSvg(item);
+  return sharp(Buffer.from(svg)).png().toBuffer();
+}
+
+function buildShareImageSvg(item) {
+  const width = 750;
+  const height = 1550;
+  const verdict = item.verdict;
+  const ratioText = `${item.plaintiffName} ${verdict.ratio.plaintiff}% / ${item.defendantName} ${verdict.ratio.defendant}%`;
+  const indices = verdict.indices || {};
+  const reasonLines = wrapText(verdict.reason || "", 27, 4);
+  const penaltyLines = wrapText(verdict.penalty || "", 24, 3);
+  const settlementLines = wrapText(verdict.settlement || "", 24, 3);
+  const titleLines = wrapText(item.title || "未命名案件", 10, 2);
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff8ea"/>
+      <stop offset="58%" stop-color="#fbf7ee"/>
+      <stop offset="100%" stop-color="#eef4ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#1c2028" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+  <rect width="${width}" height="${height}" fill="#f1ece1"/>
+  <rect x="42" y="34" width="666" height="1482" rx="18" fill="url(#bg)" stroke="#b42318" stroke-width="4" filter="url(#shadow)"/>
+  <text x="78" y="94" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="30" font-weight="900" fill="#b42318">爱情法庭</text>
+  <text x="78" y="136" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="28" font-weight="900" fill="#b42318">${escapeSvg(item.caseNumber)}号案件</text>
+  <text x="78" y="176" font-family="Arial" font-size="18" font-weight="900" fill="#255a9b">LOVE COURT VERDICT</text>
+  ${svgTextLines(titleLines, 78, 250, 48, 48, "#111827", 900)}
+
+  ${svgInfoBox(78, 332, 594, 96, "原告", item.plaintiffName)}
+  <circle cx="375" cy="468" r="36" fill="#b42318"/>
+  <text x="375" y="480" text-anchor="middle" font-family="Arial" font-size="22" font-weight="900" fill="#ffffff">VS</text>
+  ${svgInfoBox(78, 508, 594, 96, "被告", item.defendantName)}
+
+  <rect x="78" y="642" width="594" height="116" rx="12" fill="#fffdf8" stroke="#efb7b3"/>
+  <text x="104" y="688" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="22" font-weight="800" fill="#667085">责任比例</text>
+  <text x="104" y="734" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="34" font-weight="900" fill="#b42318">${escapeSvg(ratioText)}</text>
+
+  ${svgIndexBox(78, 790, "嘴硬指数", indices.hardMouth, 280)}
+  ${svgIndexBox(392, 790, "委屈指数", indices.grievance, 280)}
+  ${svgIndexBox(78, 930, "哄人难度", indices.coaxDifficulty, 280)}
+  ${svgIndexBox(392, 930, "翻旧账风险", indices.oldScoreRisk, 280)}
+
+  <rect x="78" y="1080" width="594" height="142" rx="12" fill="#eef8f2" stroke="#b7dfc6"/>
+  <text x="104" y="1124" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="22" font-weight="800" fill="#12613e">判决结果</text>
+  ${svgTextLines(penaltyLines, 104, 1164, 24, 34, "#006b47", 900)}
+
+  ${svgTextLines(reasonLines, 78, 1270, 22, 34, "#374151", 500)}
+  ${svgTextLines(settlementLines, 78, 1290 + reasonLines.length * 34, 20, 30, "#667085", 500)}
+</svg>`;
+}
+
+function svgInfoBox(x, y, width, height, label, value) {
+  return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="12" fill="#ffffff" stroke="#d7dce5"/>
+  <text x="${x + 26}" y="${y + 38}" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="21" font-weight="800" fill="#667085">${escapeSvg(label)}</text>
+  <text x="${x + 26}" y="${y + 74}" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="28" font-weight="900" fill="#111827">${escapeSvg(value || "-")}</text>`;
+}
+
+function svgIndexBox(x, y, label, value, width = 170) {
+  const safeValue = Number.isFinite(Number(value)) ? Math.round(Number(value)) : "--";
+  const center = x + width / 2;
+  return `<rect x="${x}" y="${y}" width="${width}" height="110" rx="12" fill="#ffffff" stroke="#d7dce5"/>
+  <text x="${center}" y="${y + 38}" text-anchor="middle" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="20" font-weight="800" fill="#667085">${escapeSvg(label)}</text>
+  <text x="${center}" y="${y + 84}" text-anchor="middle" font-family="Arial" font-size="42" font-weight="900" fill="#255a9b">${escapeSvg(safeValue)}</text>`;
+}
+
+function svgTextLines(lines, x, y, fontSize, lineHeight, color, weight) {
+  return lines
+    .map((line, index) => `<text x="${x}" y="${y + index * lineHeight}" font-family="Microsoft YaHei, PingFang SC, Arial" font-size="${fontSize}" font-weight="${weight}" fill="${color}">${escapeSvg(line)}</text>`)
+    .join("\n");
+}
+
+function wrapText(value, maxChars, maxLines) {
+  const text = String(value || "").replace(/\s+/g, " ").trim();
+  if (!text) return ["-"];
+  const lines = [];
+  let current = "";
+  for (const char of text) {
+    current += char;
+    if (current.length >= maxChars) {
+      lines.push(current);
+      current = "";
+      if (lines.length === maxLines) break;
+    }
+  }
+  if (current && lines.length < maxLines) lines.push(current);
+  if (lines.length === maxLines && text.length > lines.join("").length) {
+    lines[lines.length - 1] = `${lines[lines.length - 1].slice(0, Math.max(0, maxChars - 1))}…`;
+  }
+  return lines;
+}
+
+function escapeSvg(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => {
+    const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" };
+    return map[char];
+  });
 }
 
 function sendJson(res, status, payload) {

@@ -5,5 +5,8 @@
   "description": "AI情侣法庭联机MVP",
   "scripts": {
     "start": "node server.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5"
   }
 }

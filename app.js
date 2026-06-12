@@ -34,7 +34,11 @@ const elements = {
   verdictBtn: $("#verdictBtn"),
   archiveList: $("#archiveList"),
   clearArchiveBtn: $("#clearArchiveBtn"),
+  copyVerdictBtn: $("#copyVerdictBtn"),
   saveCardBtn: $("#saveCardBtn"),
+  shareImagePanel: $("#shareImagePanel"),
+  shareImagePreview: $("#shareImagePreview"),
+  shareImageDownload: $("#shareImageDownload"),
   verdictDetail: $("#verdictDetail"),
   cardCaseNo: $("#cardCaseNo"),
   cardTitle: $("#cardTitle"),
@@ -286,6 +290,19 @@ async function generateVerdict() {
   }
 }
 
+function showShareImage() {
+  const current = state.currentCase;
+  if (!current?.verdict) {
+    alert("请先生成裁决，再生成判决书图片。");
+    return;
+  }
+  const imageUrl = `/api/cases/${encodeURIComponent(current.id)}/share-image?t=${Date.now()}`;
+  elements.shareImagePreview.src = imageUrl;
+  elements.shareImageDownload.href = imageUrl;
+  elements.shareImageDownload.download = `love-court-${current.caseNumber}.png`;
+  elements.shareImagePanel.hidden = false;
+}
+
 function updateWordCount() {
   const count = elements.plaintiffStatement.value.length + elements.defendantStatement.value.length;
   elements.wordCount.textContent = `${count} / 1000`;
@@ -313,6 +330,7 @@ function hydrateCard() {
     elements.cardRatio.textContent = "等待审理";
     elements.cardPenalty.textContent = "尚未宣判";
     elements.cardReason.textContent = "双方陈词同步完成后，AI法官会生成事实认定、责任比例和娱乐处罚。";
+    elements.shareImagePanel.hidden = true;
     renderIndices();
     return;
   }
@@ -449,7 +467,8 @@ function bindEvents() {
   elements.syncBtn.addEventListener("click", () => saveCurrentCase());
   elements.askBtn.addEventListener("click", askQuestion);
   elements.verdictBtn.addEventListener("click", generateVerdict);
-  elements.saveCardBtn.addEventListener("click", exportShareCard);
+  elements.copyVerdictBtn.addEventListener("click", exportShareCard);
+  elements.saveCardBtn.addEventListener("click", showShareImage);
   elements.clearArchiveBtn.addEventListener("click", async () => {
     if (!confirm("确定清空服务端案卷吗？")) return;
     await api("/api/cases", { method: "DELETE" });
