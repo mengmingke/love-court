@@ -1,0 +1,9 @@
+{
+  "name": "love-court",
+  "version": "0.2.0",
+  "private": true,
+  "description": "AI情侣法庭联机MVP",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

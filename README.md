@@ -1,0 +1,96 @@
+# AI情侣法庭 Love Court
+
+AI情侣法庭是一个 AI 驱动的双人娱乐仲裁产品。
+
+一句话：情侣吵架别冷战，来开庭。
+
+当前仓库是 Web MVP，用来验证核心玩法：原告发起案件，被告通过链接进入，双方陈词后由 AI 法官生成娱乐裁决和判决书分享卡。
+
+## 功能
+
+- 创建案件
+- 原告 / 被告自动身份
+- 双方联机陈词
+- AI 追问
+- DeepSeek 裁决
+- 责任比例
+- 娱乐处罚
+- 嘴硬指数 / 委屈指数 / 哄人难度 / 翻旧账风险
+- 判决书分享卡
+- 案件归档
+
+## 技术栈
+
+- 前端：HTML / CSS / JavaScript
+- 后端：Node.js 原生 HTTP 服务
+- 数据：本地 JSON 文件
+- AI：DeepSeek API
+
+## 启动
+
+复制 `.env.example` 为 `.env`，并填入 DeepSeek API Key：
+
+```text
+DEEPSEEK_API_KEY=你的 DeepSeek API Key
+DEEPSEEK_MODEL=deepseek-v4-flash
+```
+
+```powershell
+npm start
+```
+
+如果没有安装 npm，也可以直接运行：
+
+```powershell
+node server.js
+```
+
+启动后访问：
+
+```text
+http://localhost:3000
+```
+
+## 联机玩法
+
+1. 原告打开首页，点击“我要起诉”。
+2. 填写案件名称、双方昵称，填写原告陈词。
+3. 点击“同步陈词”。
+4. 复制“传唤被告链接”发给对方。
+5. 对方打开同一个链接后会自动成为被告，填写被告陈词。
+6. 双方陈词完成后，点击“AI追问”或“生成裁决”。
+
+创建案件的浏览器会被记为原告。其他手机或浏览器打开同一个案件链接时，会默认作为被告进入。
+
+## 局域网分享
+
+如果对方和你在同一个 Wi-Fi/局域网，可以把链接里的 `localhost` 改成你的电脑局域网 IP。
+
+示例：
+
+```text
+http://192.168.1.90:3000
+```
+
+如果手机打不开，通常是 Windows 防火墙拦截了 Node.js，需要允许 Node.js 通过专用网络。
+
+## 数据
+
+案件数据保存在：
+
+```text
+data/cases.json
+```
+
+## AI 裁决
+
+服务端会优先调用 DeepSeek 生成裁决。如果 `.env` 没有配置 key，或者接口调用失败，会自动回退到本地规则裁决。
+
+## 文档
+
+- [PRD.md](./PRD.md)
+- [ROADMAP.md](./ROADMAP.md)
+
+## 注意
+
+不要提交 `.env`、`data/` 和 `shots/`。这些内容已在 `.gitignore` 中排除。

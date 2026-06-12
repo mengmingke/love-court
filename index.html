@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI情侣法庭 Love Court</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="AI情侣法庭">
+        <aside class="case-rail">
+          <div class="brand-block">
+            <div class="seal" aria-hidden="true">
+              <span>LC</span>
+            </div>
+            <div>
+              <p class="eyebrow">AI Love Court</p>
+              <h1>情侣吵架别冷战，来开庭。</h1>
+            </div>
+          </div>
+
+          <button class="primary-action" id="newCaseBtn" type="button">
+            <span aria-hidden="true">+</span>
+            我要起诉
+          </button>
+
+          <nav class="tab-list" aria-label="主要视图">
+            <button class="tab-button active" data-view="court" type="button">开庭</button>
+            <button class="tab-button" data-view="archive" type="button">案卷</button>
+            <button class="tab-button" data-view="share" type="button">判决书</button>
+          </nav>
+
+          <div class="case-meta">
+            <p>当前案件</p>
+            <strong id="caseNumber">尚未立案</strong>
+            <span id="inviteCode">点击“我要起诉”生成邀请码</span>
+          </div>
+
+          <div class="mini-rules">
+            <p>受理范围</p>
+            <span>仅限情侣、朋友、室友之间的轻量争议。拒绝法律、医疗、投资和严肃危机内容。</span>
+          </div>
+        </aside>
+
+        <section class="court-panel view active" id="courtView">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Step 01</p>
+              <h2>案件信息</h2>
+            </div>
+            <span class="status-pill" id="caseStatus">待立案</span>
+          </div>
+
+          <div class="next-step" id="nextStep">原告先填写案件信息和陈词，再复制链接传唤被告。</div>
+
+          <form class="case-form" id="caseForm">
+            <label>
+              案件名称
+              <input class="sync-on-blur" id="caseTitle" maxlength="24" placeholder="例如：已读不回案" required />
+            </label>
+            <div class="two-col">
+              <label>
+                原告昵称
+                <input class="sync-on-blur" id="plaintiffName" maxlength="12" placeholder="例如：女朋友" required />
+              </label>
+              <label>
+                被告昵称
+                <input class="sync-on-blur" id="defendantName" maxlength="12" placeholder="例如：男朋友" required />
+              </label>
+            </div>
+            <label>
+              传唤被告链接
+              <div class="copy-row">
+                <input id="shareLink" readonly value="立案后自动生成" />
+                <button id="copyLinkBtn" type="button">复制</button>
+              </div>
+            </label>
+          </form>
+
+          <div class="divider"></div>
+
+          <div class="panel-heading compact">
+            <div>
+              <p class="eyebrow">Step 02</p>
+              <h2>双方陈词</h2>
+            </div>
+            <div class="role-tools" aria-label="身份选择">
+              <span class="identity-pill" id="identityPill">当前身份：原告</span>
+              <span class="word-count" id="wordCount">0 / 1000</span>
+            </div>
+          </div>
+
+          <div class="statement-grid">
+            <label>
+              原告陈词
+              <textarea class="sync-on-blur" id="plaintiffStatement" maxlength="500" placeholder="说清楚发生了什么、你为什么委屈、希望对方怎么做。"></textarea>
+            </label>
+            <label>
+              被告陈词
+              <textarea class="sync-on-blur" id="defendantStatement" maxlength="500" placeholder="说清楚你的视角、有没有误会、你愿意承担什么。"></textarea>
+            </label>
+          </div>
+
+          <div class="question-box" id="questionBox" hidden>
+            <div>
+              <p class="eyebrow">AI法官追问</p>
+              <h3 id="judgeQuestion">请双方补充关键信息。</h3>
+            </div>
+            <div class="statement-grid">
+              <label>
+                原告补充
+                <textarea class="sync-on-blur" id="plaintiffAnswer" maxlength="220" placeholder="简短回答法官问题"></textarea>
+              </label>
+              <label>
+                被告补充
+                <textarea class="sync-on-blur" id="defendantAnswer" maxlength="220" placeholder="简短回答法官问题"></textarea>
+              </label>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="secondary-action" id="syncBtn" type="button">同步陈词</button>
+            <button class="secondary-action" id="askBtn" type="button">AI追问</button>
+            <button class="primary-action" id="verdictBtn" type="button">生成裁决</button>
+          </div>
+        </section>
+
+        <section class="court-panel view" id="archiveView">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Case Files</p>
+              <h2>案件档案</h2>
+            </div>
+            <button class="secondary-action small" id="clearArchiveBtn" type="button">清空</button>
+          </div>
+          <div class="archive-list" id="archiveList"></div>
+        </section>
+
+        <section class="court-panel view" id="shareView">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Share Card</p>
+              <h2>判决书分享卡</h2>
+            </div>
+            <button class="secondary-action small" id="saveCardBtn" type="button">复制文案</button>
+          </div>
+
+          <article class="verdict-card" id="verdictCard">
+            <div class="card-header">
+              <div>
+                <span>爱情法庭</span>
+                <strong id="cardCaseNo">暂无案件</strong>
+              </div>
+              <em>LOVE COURT VERDICT</em>
+            </div>
+            <h3 id="cardTitle">点击“生成裁决”后显示判决书</h3>
+
+            <div class="litigant-row">
+              <div>
+                <span>原告</span>
+                <strong id="cardPlaintiff">-</strong>
+              </div>
+              <b>VS</b>
+              <div>
+                <span>被告</span>
+                <strong id="cardDefendant">-</strong>
+              </div>
+            </div>
+
+            <div class="ratio-box">
+              <span>责任比例</span>
+              <strong id="cardRatio">等待审理</strong>
+            </div>
+
+            <div class="index-grid" id="indexGrid">
+              <div class="index-item">
+                <span>嘴硬指数</span>
+                <strong id="hardMouthIndex">--</strong>
+              </div>
+              <div class="index-item">
+                <span>委屈指数</span>
+                <strong id="grievanceIndex">--</strong>
+              </div>
+              <div class="index-item">
+                <span>哄人难度</span>
+                <strong id="coaxDifficultyIndex">--</strong>
+              </div>
+              <div class="index-item">
+                <span>翻旧账风险</span>
+                <strong id="oldScoreRiskIndex">--</strong>
+              </div>
+            </div>
+
+            <div class="penalty-box">
+              <span>判决结果</span>
+              <strong id="cardPenalty">奶茶席位空缺中</strong>
+            </div>
+            <p id="cardReason">AI法官将根据双方陈词生成事实认定、争议焦点与和解建议。</p>
+          </article>
+
+          <section class="verdict-detail" id="verdictDetail" aria-live="polite"></section>
+        </section>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
