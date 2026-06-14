@@ -295,20 +295,20 @@ function buildVerdict(item) {
   const defendantLoses = ratio.defendant >= ratio.plaintiff;
   const loser = defendantLoses ? item.defendantName : item.plaintiffName;
   const winner = defendantLoses ? item.plaintiffName : item.defendantName;
-  let penalty = `${loser}请${winner}喝奶茶一杯，并提供一次认真道歉。`;
-  if (/已读|不回|消息|微信|回复/.test(text)) penalty = `${loser}需主动报备忙碌状态 24 小时，并补发一句不敷衍的想念。`;
+  let penalty = `本庭判决：${loser}向${winner}赔付奶茶一杯，并提交不少于三句的真诚道歉陈述。`;
+  if (/已读|不回|消息|微信|回复/.test(text)) penalty = `本庭判决：${loser}执行“消息不失踪”观察期 24 小时，并补发一句不敷衍的想念。`;
   if (/纪念日|生日|节日|礼物/.test(text)) penalty = `${loser}补办一次小型仪式，预算不低于一杯奶茶加一朵花。`;
-  if (/游戏|开黑|排位|电脑/.test(text)) penalty = `${loser}暂停排位一晚，安排一次完整陪伴局。`;
-  if (/奶茶|外卖|吃|饭|零食/.test(text)) penalty = `${loser}赔偿同款食物一份，并承诺下次先问归属权。`;
+  if (/游戏|开黑|排位|电脑/.test(text)) penalty = `本庭判决：${loser}暂停排位一晚，改开一局认真陪伴局。`;
+  if (/奶茶|外卖|吃|饭|零食/.test(text)) penalty = `本庭判决：${loser}赔偿同款食物一份，并学习“入口之前先确认归属权”。`;
   if (Math.abs(ratio.defendant - ratio.plaintiff) <= 10) penalty = "双方各退一步：一人道歉一句，一人停止翻旧账 24 小时。";
   return {
     ratio,
-    focus: ["双方是否提前表达期待与边界", "是否存在失约、忽视或沟通不足", "事后是否主动解释、补救与安抚"],
-    facts: `经审理，本案主要围绕“${item.title}”展开。双方均有表达情绪，但争议核心不在输赢，而在期待是否被说清、承诺是否被尊重。`,
-    reason: `本庭认为，亲密关系里的小事通常不是小事本身，而是背后的重视感。${loser}在本案中需要承担更多安抚和补救义务，${winner}也应避免把本案扩大为历史总账。`,
+    focus: ["期待是否提前表达清楚", "承诺是否被认真执行", "事后是否及时解释和安抚"],
+    facts: `本庭查明，本案案由为“${item.title}”。双方争议表面看是小事，实质是重视感、边界感与沟通时机的联合罢工。`,
+    reason: `本庭认为，${loser}在本案中更应承担安抚与补救义务；${winner}虽有委屈，但也应避免把本案升级为历史连续剧。`,
     penalty,
     indices: buildFunIndices(item, ratio),
-    settlement: "建议双方在判决后 30 分钟内完成和解动作：说清一个具体需求，给出一个具体补偿，然后本案封存，禁止无限上诉。",
+    settlement: "判决生效后，请双方完成一次不翻旧账沟通：一个人说明需求，一个人给出补偿，本案当晚封存。",
     reasoning: buildLocalReasoning(item, ratio),
   };
 }
@@ -392,7 +392,9 @@ async function buildAiVerdict(item) {
             role: "system",
             content: [
               "你是 AI情侣法庭的娱乐法官，只处理情侣、朋友、室友之间的轻量互动争议。",
-              "你的目标不是严肃判案，而是在轻松、好笑、克制的语气中帮助双方表达、倾听与和解。",
+              "你的目标不是严肃判案，而是把争执包装成一份有仪式感、可转发、会让双方愿意笑一下的娱乐裁决。",
+              "语言风格：像一本正经的爱情法庭判决书，轻微幽默，短句有梗，但不要油腻、不要阴阳怪气、不要羞辱任何一方。",
+              "判决逻辑：先承认双方感受，再指出关键沟通问题，最后给出可执行的轻量处罚和和解动作。",
               "禁止提供法律咨询、医疗建议、投资建议、危机干预、代码生成或泛闲聊。",
               "只输出合法 JSON，不要使用 Markdown，不要添加解释性前后缀。",
             ].join("\n"),
@@ -406,6 +408,9 @@ async function buildAiVerdict(item) {
               "责任比例相加必须等于100，单方责任不要低于15或高于85。",
               "indices 四项范围必须是 0 到 100 的整数，分别代表嘴硬指数、委屈指数、哄人难度、翻旧账风险。",
               "reasoning 是 3 到 5 个推理步骤的数组，每步包含 step（序号）、label（步骤标签）、text（说明文字，80字内）。用用户易于理解的语言，避免技术术语。",
+              "facts 要像“本庭查明”，reason 要像“本庭认为”，penalty 要像“本庭判决”。",
+              "不要输出心理诊断，不要劝分，不要扩大矛盾，不要使用法律术语冒充真实法律结论。",
+              "优先生成适合截图传播的句子，避免长段说教。",
               "娱乐处罚可以是奶茶、道歉、拥抱、暂停翻旧账、陪伴等轻量动作。",
               JSON.stringify(prompt),
             ].join("\n"),
