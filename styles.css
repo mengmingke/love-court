@@ -481,6 +481,18 @@ textarea:focus {
   line-height: 1.15;
 }
 
+.case-quote {
+  margin: -4px 0 18px;
+  border-left: 4px solid var(--gold);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: #5b3714;
+  background: rgba(255, 248, 233, 0.9);
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1.55;
+}
+
 .litigant-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 42px minmax(0, 1fr);
@@ -864,10 +876,16 @@ body[data-poster="true"] #flipCardBtn {
 
   .share-actions {
     width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .share-actions .secondary-action {
-    flex: 1 1 130px;
+    width: 100%;
+  }
+
+  .share-actions .secondary-action:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 
   .verdict-card {
@@ -898,6 +916,10 @@ body[data-poster="true"] #flipCardBtn {
 
   .verdict-card h3 {
     font-size: 23px;
+  }
+
+  .case-quote {
+    font-size: 15px;
   }
 
   .card-header {

@@ -48,6 +48,7 @@ const elements = {
   cardTitle: $("#cardTitle"),
   cardPlaintiff: $("#cardPlaintiff"),
   cardDefendant: $("#cardDefendant"),
+  cardQuote: $("#cardQuote"),
   cardRatio: $("#cardRatio"),
   cardPenalty: $("#cardPenalty"),
   cardReason: $("#cardReason"),
@@ -336,6 +337,7 @@ function hydrateCard() {
   elements.cardDefendant.textContent = current.defendantName || "-";
   if (!current.verdict) {
     elements.cardRatio.textContent = "等待审理";
+    elements.cardQuote.textContent = "本案金句将在宣判后生成";
     elements.cardPenalty.textContent = "尚未宣判";
     elements.cardReason.textContent = "双方陈词同步完成后，AI法官会生成事实认定、责任比例和娱乐处罚。";
     elements.shareImagePanel.hidden = true;
@@ -344,8 +346,9 @@ function hydrateCard() {
     renderIndices();
     return;
   }
-  const { ratio, penalty, reason, indices } = current.verdict;
+  const { ratio, quote, penalty, reason, settlement, indices } = current.verdict;
   elements.cardRatio.textContent = `${current.plaintiffName} ${ratio.plaintiff}% / ${current.defendantName} ${ratio.defendant}%`;
+  elements.cardQuote.textContent = quote || settlement || reason || "小事不小，重视感要及时送达。";
   elements.cardPenalty.textContent = penalty;
   elements.cardReason.textContent = reason;
   renderIndices(indices);
@@ -498,6 +501,7 @@ function exportShareCard() {
     `原告：${current.plaintiffName}`,
     `被告：${current.defendantName}`,
     `责任比例：${current.plaintiffName} ${current.verdict.ratio.plaintiff}% / ${current.defendantName} ${current.verdict.ratio.defendant}%`,
+    `本案金句：${current.verdict.quote || current.verdict.settlement || current.verdict.reason}`,
     `娱乐指数：嘴硬${formatIndex(current.verdict.indices?.hardMouth)} / 委屈${formatIndex(current.verdict.indices?.grievance)} / 哄人难度${formatIndex(current.verdict.indices?.coaxDifficulty)} / 翻旧账风险${formatIndex(current.verdict.indices?.oldScoreRisk)}`,
     `判决结果：${current.verdict.penalty}`,
   ].join("\n");
