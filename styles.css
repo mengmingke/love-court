@@ -601,7 +601,7 @@ textarea:focus {
 }
 
 .card-flip {
-  position: relative;
+  display: grid;
   transition: transform 0.6s ease-in-out;
   transform-style: preserve-3d;
 }
@@ -611,25 +611,25 @@ textarea:focus {
 }
 
 .card-face {
+  grid-area: 1 / 1;
   backface-visibility: hidden;
+  min-height: 0;
 }
 
 .card-front {
-  position: relative;
 }
 
 .card-back {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
   transform: rotateY(180deg);
   backface-visibility: hidden;
+  display: flex;
+  height: 100%;
 }
 
 /* 背面内容样式 */
 .verdict-back-content {
   max-width: 560px;
+  width: 100%;
   padding: 24px;
   border: 2px solid var(--red);
   border-radius: 8px;
@@ -637,7 +637,8 @@ textarea:focus {
     linear-gradient(135deg, rgba(37, 90, 155, 0.08), transparent 32%),
     linear-gradient(315deg, rgba(180, 35, 24, 0.06), transparent 36%),
     var(--paper);
-  max-height: 80vh;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -956,20 +957,18 @@ body[data-poster="true"] #flipCardBtn {
   }
 
   .card-back {
-    position: relative;
     transform: none;
   }
 
   .card-flip.flipped .card-front {
-    display: none;
+    visibility: hidden;
   }
 
   .card-flip.flipped .card-back {
-    position: relative;
     transform: none;
   }
 
   .card-flip:not(.flipped) .card-back {
-    display: none;
+    visibility: hidden;
   }
 }
