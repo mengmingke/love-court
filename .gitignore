@@ -1,6 +1,7 @@
 .env
 data/
 shots/
+local-work/
 *.log
 node_modules/
 .DS_Store
