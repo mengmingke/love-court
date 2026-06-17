@@ -1,10 +1,10 @@
 import { defineConfig, type UserConfigExport } from '@tarojs/cli';
-import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
+import path from 'path';
 import devConfig from './dev';
 import prodConfig from './prod';
-import vitePluginImp from 'vite-plugin-imp';
 // https://taro-docs.jd.com/docs/next/config#defineconfig-辅助函数
 export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
+  const isDev = mode === 'development';
   const baseConfig: UserConfigExport<'webpack5'> = {
     projectName: 'love-court-miniapp',
     date: '2025-12-10',
@@ -33,7 +33,11 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
     cache: {
       enable: false, // Webpack 持久化缓存配置，建议开启。默认配置请参考：https://docs.taro.zone/docs/config-detail#cache
     },
+    alias: {
+      '@': path.resolve(__dirname, '..', 'src'),
+    },
     mini: {
+      compileType: 'miniprogram',
       postcss: {
         pxtransform: {
           enable: true,
@@ -48,9 +52,6 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
             generateScopedName: '[name]__[local]___[hash:base64:5]',
           },
         },
-      },
-      webpackChain(chain) {
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin);
       },
     },
     h5: {
@@ -86,9 +87,6 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
           },
         },
       },
-      webpackChain(chain) {
-        chain.resolve.plugin('tsconfig-paths').use(TsconfigPathsPlugin);
-      },
     },
     rn: {
       appName: 'taroDemo',
@@ -99,7 +97,7 @@ export default defineConfig<'webpack5'>(async (merge, { command, mode }) => {
       },
     },
   };
-  if (process.env.NODE_ENV === 'development') {
+  if (isDev) {
     // 本地开发构建配置（不混淆压缩）
     return merge({}, baseConfig, devConfig);
   }

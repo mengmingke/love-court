@@ -33,3 +33,42 @@ navigator {
   font-size: 30px !important;
   line-height: 1.4 !important;
 }
+
+// 3. 按钮禁用态兼容：保证 disabled 在所有微信版本下视觉一致
+button[disabled],
+button.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+// 4. 按钮点击反馈：避免旧版微信默认蓝色高亮
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+// 5. 输入框 placeholder 兼容（不同微信版本颜色不一致）
+input,
+textarea {
+  -webkit-appearance: none;
+}
+
+input[disabled],
+textarea[disabled] {
+  color: #9188a6;
+  background: #f3edf9;
+}
+
+// 6. 安全区变量兜底（旧版本微信不支持 env() 时回退到 0）
+page {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left: env(safe-area-inset-left, 0px);
+  --safe-area-right: env(safe-area-inset-right, 0px);
+}
+
+// 7. 长按/选中文字兼容：禁止图片长按弹出菜单
+image {
+  -webkit-user-select: none;
+  user-select: none;
+}
+

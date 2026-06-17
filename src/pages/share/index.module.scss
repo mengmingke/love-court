@@ -3,12 +3,34 @@
 .container {
   min-height: 100vh;
   padding: 32rpx;
+  padding-top: calc(32rpx + env(safe-area-inset-top, 0rpx));
+  padding-bottom: calc(64rpx + env(safe-area-inset-bottom, 0rpx));
   background: linear-gradient(180deg, #f0f7ff 0%, $color-bg-page 100%);
+}
+
+.networkHint {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16rpx;
+  padding: 16rpx 24rpx;
+  border-radius: $radius-lg;
+  background: rgba(255, 125, 0, 0.12);
+  border: 2rpx solid rgba(255, 125, 0, 0.24);
+}
+
+.networkHintText {
+  display: block;
+  font-size: $font-size-xs;
+  line-height: $line-height-loose;
+  color: #9a5a00;
+  text-align: center;
 }
 
 .header,
 .posterCard,
-.emptyCard {
+.emptyCard,
+.loadingCard,
+.errorCard {
   box-sizing: border-box;
   width: 100%;
   margin-bottom: 24rpx;
@@ -16,6 +38,26 @@
   border-radius: 28rpx;
   background: $color-bg-card;
   box-shadow: $shadow-card;
+}
+
+.loadingCard,
+.errorCard {
+  text-align: center;
+}
+
+.loadingText {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.errorTitle {
+  display: block;
+  margin-bottom: 24rpx;
+  font-size: $font-size-md;
+  color: $color-error;
+  line-height: $line-height-loose;
 }
 
 .title {
@@ -189,4 +231,18 @@
   font-size: $font-size-lg;
   font-weight: $font-weight-bold;
   color: $color-text-primary;
+}
+
+.posterPreview {
+  margin-top: 24rpx;
+  padding: 16rpx;
+  border-radius: $radius-lg;
+  background: #fbf9ff;
+  border: 2rpx solid $color-border;
+}
+
+.posterImage {
+  width: 100%;
+  border-radius: $radius-lg;
+  display: block;
 }

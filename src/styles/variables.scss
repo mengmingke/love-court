@@ -111,6 +111,32 @@ $transition-slow: 0.35s ease;
   white-space: normal; // 恢复子项内部换行
 }
 
+// 安全区域：顶部（状态栏 + 刘海）
+@mixin safe-area-top($extra: 0rpx) {
+  padding-top: calc(#{$extra} + env(safe-area-inset-top, 0rpx));
+}
+
+// 安全区域：底部（Home Indicator）
+@mixin safe-area-bottom($extra: 0rpx) {
+  padding-bottom: calc(#{$extra} + env(safe-area-inset-bottom, 0rpx));
+}
+
+// 安全区域：左右（横屏刘海）
+@mixin safe-area-horizontal($extra: 0rpx) {
+  padding-left: calc(#{$extra} + env(safe-area-inset-left, 0rpx));
+  padding-right: calc(#{$extra} + env(safe-area-inset-right, 0rpx));
+}
+
+// 底部固定栏（带 Home Indicator 安全间距）
+@mixin fixed-bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  @include safe-area-bottom(16rpx);
+}
+
 // Button 样式重置与保护
 // 使用方法：@include button-reset;
 @mixin button-reset {

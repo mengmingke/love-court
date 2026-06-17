@@ -1,0 +1,148 @@
+@use '@/styles/variables.scss' as *;
+
+.container {
+  min-height: 100vh;
+  padding: 32rpx;
+  padding-top: calc(32rpx + env(safe-area-inset-top, 0rpx));
+  padding-bottom: calc(64rpx + env(safe-area-inset-bottom, 0rpx));
+  background: linear-gradient(180deg, #f7f2ff 0%, $color-bg-page 48%, #fff7f0 100%);
+}
+
+.header,
+.sectionCard,
+.dangerCard {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 24rpx;
+  padding: 32rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: $shadow-card;
+}
+
+.header {
+  background: linear-gradient(135deg, rgba(124, 77, 255, 0.16), rgba(255, 125, 0, 0.1));
+}
+
+.title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.desc {
+  display: block;
+  margin-top: 14rpx;
+  font-size: $font-size-sm;
+  line-height: $line-height-loose;
+  color: $color-text-secondary;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.sectionBody {
+  display: block;
+  margin-top: 16rpx;
+  font-size: $font-size-sm;
+  line-height: $line-height-loose;
+  color: $color-text-secondary;
+}
+
+.list {
+  margin-top: 12rpx;
+  padding-left: 24rpx;
+}
+
+.listItem {
+  display: block;
+  margin-top: 8rpx;
+  font-size: $font-size-sm;
+  line-height: $line-height-loose;
+  color: $color-text-secondary;
+}
+
+.dangerCard {
+  border: 2rpx solid rgba(245, 63, 63, 0.24);
+  background: rgba(245, 63, 63, 0.04);
+}
+
+.dangerTitle {
+  display: block;
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-error;
+}
+
+.dangerDesc {
+  display: block;
+  margin-top: 12rpx;
+  font-size: $font-size-sm;
+  line-height: $line-height-loose;
+  color: $color-text-secondary;
+}
+
+.deleteButton {
+  @include button-reset;
+  margin-top: 24rpx;
+  width: 100%;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, #f53f3f, #ff7d00);
+  border: 2rpx solid transparent;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+
+  &::after {
+    display: none;
+  }
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.buttonInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 16rpx;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.deleteButtonText {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-white;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.footer {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 16rpx;
+  padding: 24rpx;
+  text-align: center;
+}
+
+.footerText {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  line-height: $line-height-loose;
+}

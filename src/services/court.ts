@@ -1,21 +1,24 @@
 import Taro from '@tarojs/taro';
-import type { CasePatch, CourtCase, VerdictRatio } from '@/types/court';
+import { buildApiUrl } from '@/config/env';
+import { getBusinessAuthHeader, getClientIdentityHeader } from '@/services/auth';
+import type { CasePatch, CourtCase, JoinCaseInput, VerdictRatio, UserRole } from '@/types/court';
 
-const API_BASE =
-  typeof process !== 'undefined' && process.env && process.env.TARO_APP_API_BASE
-    ? process.env.TARO_APP_API_BASE
-    : 'http://127.0.0.1:3000';
 const LOCAL_CASES_KEY = 'love-court-miniapp-cases';
 
 interface ApiResponse<T> {
-  case?: CourtCase;
-  cases?: CourtCase[];
+  case?: T;
+  cases?: T extends Array<infer U> ? U[] : T[];
   error?: string;
   ok?: boolean;
+  page?: number;
+  pageSize?: number;
+  total?: number;
+  totalPages?: number;
+  removed?: number;
 }
 
 async function request<T>(path: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE' = 'GET', data?: unknown): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = buildApiUrl(path);
   console.info('[CourtAPI] request', { path, method });
   try {
     const response = await Taro.request<ApiResponse<T>>({
@@ -24,6 +27,8 @@ async function request<T>(path: string, method: 'GET' | 'POST' | 'PATCH' | 'DELE
       data,
       header: {
         'Content-Type': 'application/json',
+        ...getBusinessAuthHeader(),
+        ...getClientIdentityHeader(),
       },
     });
 
@@ -163,24 +168,92 @@ function getLocalCase(caseId: string) {
 
 export const courtApi = {
   createCase: () => withLocalFallback(() => request<{ case: CourtCase }>('/api/cases', 'POST'), () => ({ case: createLocalCase() })),
+  joinCase: (input: JoinCaseInput | string, role: UserRole = 'defendant') => {
+    const payload = typeof input === 'string' ? { caseId: input, role } : input;
+    const caseId = payload.caseId || '';
+    if (!caseId) {
+      return Promise.reject(new Error('缺少案件 ID'));
+    }
+    if (isLocalCase(caseId)) {
+      return Promise.resolve({ case: getLocalCase(caseId) });
+    }
+    return withLocalFallback(
+      () => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/join`, 'POST', { role: payload.role, inviteCode: payload.inviteCode }),
+      () => ({ case: getLocalCase(caseId) }),
+    );
+  },
   getCase: (caseId: string) => {
     if (isLocalCase(caseId)) return Promise.resolve({ case: getLocalCase(caseId) });
     return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}`), () => ({ case: getLocalCase(caseId) }));
   },
-  listCases: () => withLocalFallback(() => request<{ cases: CourtCase[] }>('/api/cases'), () => ({ cases: readLocalCases() })),
-  updateCase: (caseId: string, patch: CasePatch) => {
+  listCases: (page = 1, pageSize = 10) => withLocalFallback(() => request<{ cases: CourtCase[]; page?: number; pageSize?: number; total?: number; totalPages?: number }>(`/api/me/cases?page=${page}&pageSize=${pageSize}`), () => ({ cases: readLocalCases(), page: 1, pageSize: readLocalCases().length || 10, total: readLocalCases().length, totalPages: 1 })),
+  updateCase: (caseId: string, patch: CasePatch & { role?: UserRole }) => {
     const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, ...patch, updatedAt: new Date().toISOString() })) });
     if (isLocalCase(caseId)) return Promise.resolve(localAction());
-    return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}`, 'PATCH', patch), localAction);
+    return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/statements`, 'PATCH', patch), localAction);
   },
   askQuestion: (caseId: string) => {
     const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, question: buildLocalQuestion(item), updatedAt: new Date().toISOString() })) });
     if (isLocalCase(caseId)) return Promise.resolve(localAction());
     return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/question`, 'POST'), localAction);
   },
+  archiveCase: (caseId: string) => {
+    const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, archivedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })) });
+    if (isLocalCase(caseId)) return Promise.resolve(localAction());
+    return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/archive`, 'POST'), localAction);
+  },
+  restoreCase: (caseId: string) => {
+    const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, archivedAt: null, deletedAt: null, updatedAt: new Date().toISOString() })) });
+    if (isLocalCase(caseId)) return Promise.resolve(localAction());
+    return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/restore`, 'POST'), localAction);
+  },
+  deleteCase: (caseId: string) => {
+    const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })) });
+    if (isLocalCase(caseId)) return Promise.resolve(localAction());
+    return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/delete`, 'POST'), localAction);
+  },
+  purgeCase: (caseId: string) => {
+    const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, deletedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })) });
+    if (isLocalCase(caseId)) return Promise.resolve(localAction());
+    return withLocalFallback<{ case: CourtCase }>(() => request<{ ok?: boolean }>(`/api/cases/${encodeURIComponent(caseId)}/purge`, 'POST').then(() => ({ case: getLocalCase(caseId) })), localAction);
+  },
   buildVerdict: (caseId: string) => {
     const localAction = () => ({ case: updateLocalCase(caseId, (item) => ({ ...item, verdict: buildLocalVerdict(item), updatedAt: new Date().toISOString() })) });
     if (isLocalCase(caseId)) return Promise.resolve(localAction());
     return withLocalFallback(() => request<{ case: CourtCase }>(`/api/cases/${encodeURIComponent(caseId)}/verdict`, 'POST'), localAction);
   },
+  getShareImageUrl: (caseId: string) => buildApiUrl(`/api/cases/${encodeURIComponent(caseId)}/share-image`),
+  downloadShareImage: async (caseId: string) => {
+    const url = buildApiUrl(`/api/cases/${encodeURIComponent(caseId)}/share-image`);
+    const downloadResult = await Taro.downloadFile({
+      url,
+      header: {
+        ...getBusinessAuthHeader(),
+        ...getClientIdentityHeader(),
+      },
+    });
+    if (downloadResult.statusCode < 200 || downloadResult.statusCode >= 300) {
+      throw new Error('裁决海报生成失败');
+    }
+    return downloadResult.tempFilePath;
+  },
+  // 数据删除入口：软删除当前用户可见的全部案件
+  deleteMyData: () => withLocalFallback(
+    () => request<{ ok?: boolean; removed?: number }>('/api/me/data', 'DELETE'),
+    () => {
+      const cases = readLocalCases();
+      const now = new Date().toISOString();
+      let removed = 0;
+      for (const item of cases) {
+        if (!item.deletedAt) {
+          item.deletedAt = now;
+          item.updatedAt = now;
+          removed += 1;
+        }
+      }
+      writeLocalCases(cases);
+      return { ok: true, removed };
+    },
+  ),
 };
+

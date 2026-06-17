@@ -3,8 +3,54 @@
 .container {
   min-height: 100vh;
   padding: 32rpx;
-  padding-bottom: 64rpx;
+  padding-top: calc(32rpx + env(safe-area-inset-top, 0rpx));
+  padding-bottom: calc(64rpx + env(safe-area-inset-bottom, 0rpx));
   background: linear-gradient(180deg, #f7f2ff 0%, $color-bg-page 48%, #fff7f0 100%);
+}
+
+.networkHint {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16rpx;
+  padding: 16rpx 24rpx;
+  border-radius: $radius-lg;
+  background: rgba(255, 125, 0, 0.12);
+  border: 2rpx solid rgba(255, 125, 0, 0.24);
+}
+
+.networkHintText {
+  display: block;
+  font-size: $font-size-xs;
+  line-height: $line-height-loose;
+  color: #9a5a00;
+  text-align: center;
+}
+
+.loadingCard,
+.errorCard {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 24rpx;
+  padding: 48rpx 32rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: $shadow-card;
+  text-align: center;
+}
+
+.loadingText {
+  display: block;
+  font-size: $font-size-md;
+  color: $color-text-secondary;
+  line-height: $line-height-loose;
+}
+
+.errorTitle {
+  display: block;
+  margin-bottom: 24rpx;
+  font-size: $font-size-md;
+  color: $color-error;
+  line-height: $line-height-loose;
 }
 
 .hero,
